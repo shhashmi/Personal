@@ -13,7 +13,7 @@ public class UpdateDriverLocationRequest {
 	@JsonProperty("latitude")
 	private Float latitude;
 	
-	@JsonProperty("longitide")
+	@JsonProperty("longitude")
 	private Float longitude;
 	
 	@JsonProperty("accuracy")

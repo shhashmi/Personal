@@ -22,9 +22,8 @@ public class Location {
 		this.longitude = longitude;
 	}
 	
-	public long diff(Location location) {
-		Double d = new Double(23);
+	public int diff(Location location) {
 		
-		return  new Double(Math.sqrt(Math.pow(location.getLatitude()-this.getLatitude(), 2)+Math.pow(location.getLongitude()-this.getLongitude(), 2))).longValue();
+		return  new Double(Math.sqrt(Math.pow(location.getLatitude()-this.getLatitude(), 2)+Math.pow(location.getLongitude()-this.getLongitude(), 2))).intValue();
 	}
 }
