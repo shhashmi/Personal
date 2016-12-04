@@ -1,6 +1,7 @@
 package com.gojek.locator.service.impl;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -53,12 +54,12 @@ public class DriverServiceImpl implements DriverService{
 
 	@Override
 	public Set<GetDriverResponse> getDrivers(Location location, int driverCountLimit, int radius) {
-		Set<Integer> driverIds = locationToDriverCache.getDrivers(location);
+		Map<DriverLocation,Integer> driverLocationWithDistance = locationToDriverCache.getMaxDriverCountInRange(location, radius, driverCountLimit);
 		Set<GetDriverResponse> driverLocationsWithDistance = new HashSet<GetDriverResponse>();
-		driverIds.forEach((driverId->{
+		driverLocationWithDistance.forEach(((dLoc,disntace)->{
 			GetDriverResponse getDriverResponse = new GetDriverResponse();
-			getDriverResponse.setDriverId(driverId);
-			Location driverLocation = driverLocationCache.getLocation(driverId);
+			getDriverResponse.setDriverId(dLoc.getDriverId());
+			Location driverLocation = dLoc.getLocation();
 			getDriverResponse.setLatitude(driverLocation.getLatitude());
 			getDriverResponse.setLongitude(driverLocation.getLongitude());
 			getDriverResponse.setDistance(location.diff(driverLocation));
