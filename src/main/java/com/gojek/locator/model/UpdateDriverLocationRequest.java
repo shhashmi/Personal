@@ -11,30 +11,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UpdateDriverLocationRequest {
 
 	@JsonProperty("latitude")
-	private Float latitude;
+	private Double latitude;
 	
 	@JsonProperty("longitude")
-	private Float longitude;
+	private Double longitude;
 	
 	@JsonProperty("accuracy")
-	private Float accuracy;
+	private Double accuracy;
 	
-	public Float getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
-	public void setLatitude(Float latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-	public Float getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
-	public void setLongitude(Float longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public Float getAccuracy() {
+	public Double getAccuracy() {
 		return accuracy;
 	}
-	public void setAccuracy(Float accuracy) {
+	public void setAccuracy(Double accuracy) {
 		this.accuracy = accuracy;
 	}
 }

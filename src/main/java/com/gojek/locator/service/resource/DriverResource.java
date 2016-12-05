@@ -46,7 +46,7 @@ public class DriverResource {
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getDrivers(@QueryParam("latitude") Float latitude, @QueryParam("longitude") Float longitude,
+	public Response getDrivers(@QueryParam("latitude") Double latitude, @QueryParam("longitude") Double longitude,
 			@QueryParam("radius") @DefaultValue("500") int radius, @QueryParam("limit") @DefaultValue("10") int limit) {
 		Set<GetDriverResponse> drivers = driverService.getDrivers(new Location(latitude,longitude), limit, radius);
 		

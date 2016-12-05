@@ -23,13 +23,13 @@ public class LocationToDriverCache {
 	@Autowired
 	private DriverLocationCache driverLocations;
 	
-	NavigableMap<Float, Set<Integer>> latRangeMap = new TreeMap<Float,Set<Integer>>();
-	NavigableMap<Float, Set<Integer>> longRangeMap = new TreeMap<Float,Set<Integer>>();
+	NavigableMap<Double, Set<Integer>> latRangeMap = new TreeMap<Double,Set<Integer>>();
+	NavigableMap<Double, Set<Integer>> longRangeMap = new TreeMap<Double,Set<Integer>>();
 	
 	public void addToCache(int driverId,Location location) {
 		
-		Float latKey = getLocationKey(location.getLatitude());
-		Float longKey = getLocationKey(location.getLongitude());
+		Double latKey = getLatLongKey(location.getLatitude());
+		Double longKey = getLatLongKey(location.getLongitude());
 		if(latRangeMap.containsKey(latKey)) {
 			latRangeMap.get(latKey).add(driverId);
 		}
@@ -67,12 +67,16 @@ public class LocationToDriverCache {
 		//Set<Integer> drivers = getDrivers(searchLocation);
 		
 		Map<DriverLocation,Integer> driverWithDistance = new HashMap<DriverLocation,Integer>();
-		LinkedList<Location> surroundingLocationQueue = new LinkedList<Location>();
-		surroundingLocationQueue.add(searchLocation);
 		Set<Location> visitedLocation = new HashSet<Location>();
+		LinkedList<Location> surroundingLocationQueue = new LinkedList<Location>();
+		surroundingLocationQueue.addAll(getLocationsAround(searchLocation, visitedLocation,searchLocation,distance));
+		
 		Location location = null;
 		while((location=surroundingLocationQueue.pollLast())!=null) {
-			visitedLocation.add(location);
+			if(location.diff(searchLocation)>distance) {
+				break;
+			}
+			
 			Set<Integer> drivers = getDrivers(location);
 			drivers.forEach((driver->{
 				Location dLoc = driverLocations.getLocation(driver);
@@ -86,7 +90,7 @@ public class LocationToDriverCache {
 				break;
 			}
 			
-			getLocationsAround(location, visitedLocation).forEach((item->{
+			getLocationsAround(location, visitedLocation,searchLocation,distance).forEach((item->{
 				surroundingLocationQueue.addFirst(item);
 			}));
 						
@@ -97,42 +101,53 @@ public class LocationToDriverCache {
 	}
 	
 	
-	Set<Location> getLocationsAround(Location location,Set<Location> visited) {
+	Set<Location> getLocationsAround(Location location, Set<Location> visited,Location searchLocation, int distance) {
 		Set<Location> locations = new HashSet<Location>();
-		Float higherLat = latRangeMap.higherKey(location.getLatitude())!=null?latRangeMap.higherKey(latRangeMap.higherKey(location.getLatitude())):null;
-		Float higherLong =longRangeMap.higherKey(location.getLongitude())!=null?longRangeMap.higherKey(longRangeMap.higherKey(location.getLongitude())):null;
-		Float lowerLat = latRangeMap.lowerKey(location.getLatitude());
-		Float lowerLong = latRangeMap.lowerKey(location.getLatitude());
+		Double higherLat = getLatLongKey(latRangeMap.higherKey(location.getLatitude())!=null?latRangeMap.higherKey(latRangeMap.higherKey(location.getLatitude())):null);
+		Double higherLong =getLatLongKey(longRangeMap.higherKey(location.getLongitude())!=null?longRangeMap.higherKey(longRangeMap.higherKey(location.getLongitude())):null);
+		Double lowerLat = getLatLongKey(latRangeMap.lowerKey(location.getLatitude()));
+		Double lowerLong = getLatLongKey(longRangeMap.lowerKey(location.getLongitude()));
 		if(lowerLat!=null) {
-			locations.add(new Location(lowerLat,location.getLongitude()));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(lowerLat,getLatLongKey(location.getLongitude())),distance);
 		}
 		if(higherLat!=null) {
-			locations.add(new Location(higherLat,location.getLongitude()));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(higherLat,getLatLongKey(location.getLongitude())),distance);
 		}
 		if(lowerLong!=null) {
-			locations.add(new Location(location.getLatitude(),lowerLong));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(getLatLongKey(location.getLatitude()),lowerLong),distance);
 		}
 		if(higherLong!=null) {
-			locations.add(new Location(location.getLatitude(),higherLong));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(getLatLongKey(location.getLatitude()),higherLong),distance);
 		}
 		
 		if(lowerLat!=null && lowerLong!=null) {
-			locations.add(new Location(lowerLat,lowerLong));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(lowerLat,lowerLong),distance);
 		}
 		if(higherLat!=null && higherLong!=null) {
-			locations.add(new Location(higherLat,higherLong));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(higherLat,higherLong),distance);
+
 		}
 		if(lowerLat!=null && higherLong!=null) {
-			locations.add(new Location(lowerLat,higherLong));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(lowerLat,higherLong),distance);
 		}
 		if(higherLat!=null && lowerLong!=null) {
-			locations.add(new Location(higherLat,lowerLong));
+			addToSurroundingLocationSet(locations,searchLocation,new Location(higherLat,lowerLong),distance);
+
 		}
-				
+		
 		locations.removeAll(visited);
+		
+		locations.forEach((item->{
+			visited.add(new Location(getLatLongKey(item.getLatitude()),getLatLongKey(item.getLongitude())));
+		}));
 		return locations;
 	}
-	private Set<Integer> getEntryValueSet(Entry<Float,Set<Integer>> entry) {
+	private void addToSurroundingLocationSet(Set<Location> locations,Location searchLocation,Location location, int distance) {
+		if(location.diff(searchLocation)<=distance) {
+			locations.add(location);
+		}
+	}
+	private Set<Integer> getEntryValueSet(Entry<Double,Set<Integer>> entry) {
 		if(entry == null) {
 			return new HashSet<Integer>();
 		}
@@ -143,8 +158,8 @@ public class LocationToDriverCache {
 		if(driverLocation.getLocation()==null) {
 			return ;
 		}
-		Float latKey = getLocationKey(driverLocation.getLocation().getLatitude());
-		Float longKey = getLocationKey(driverLocation.getLocation().getLongitude());
+		Double latKey = getLatLongKey(driverLocation.getLocation().getLatitude());
+		Double longKey = getLatLongKey(driverLocation.getLocation().getLongitude());
 		if(latRangeMap.get(latKey)!=null) {
 			latRangeMap.get(latKey).remove(driverLocation.getDriverId());
 		}
@@ -153,11 +168,13 @@ public class LocationToDriverCache {
 			longRangeMap.get(longKey).remove(driverLocation.getDriverId());
 		}
 	}
-	private Float getLocationKey(Float value) {
-		
+	private Double getLatLongKey(Double value) {
+		if(value==null) {
+			return null;
+		}
 		BigDecimal b = new BigDecimal(value);
 		
-		return b.setScale(3, BigDecimal.ROUND_HALF_UP).floatValue();
+		return b.setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
 		
 	}
 	

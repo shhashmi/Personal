@@ -2,21 +2,21 @@ package com.gojek.locator.model;
 
 public class Location {
 
-	private Float latitude;
-	private Float longitude;
-	public Float getLatitude() {
+	private Double latitude;
+	private Double longitude;
+	public Double getLatitude() {
 		return latitude;
 	}
-	public void setLatitude(Float latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-	public Float getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
-	public void setLongitude(Float longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public Location(Float latitude, Float longitude) {
+	public Location(Double latitude, Double longitude) {
 		super();
 		this.latitude = latitude;
 		this.longitude = longitude;
@@ -26,4 +26,40 @@ public class Location {
 		
 		return  new Double(Math.sqrt(Math.pow(location.getLatitude()-this.getLatitude(), 2)+Math.pow(location.getLongitude()-this.getLongitude(), 2))).intValue();
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((latitude == null) ? 0 : latitude.hashCode());
+		result = prime * result + ((longitude == null) ? 0 : longitude.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Location other = (Location) obj;
+		if (latitude == null) {
+			if (other.latitude != null)
+				return false;
+		} else if (!latitude.equals(other.latitude))
+			return false;
+		if (longitude == null) {
+			if (other.longitude != null)
+				return false;
+		} else if (!longitude.equals(other.longitude))
+			return false;
+		return true;
+	}
+	@Override
+	public String toString() {
+		return "Location [latitude=" + latitude + ", longitude=" + longitude + "]";
+	}
+	
+	
 }
