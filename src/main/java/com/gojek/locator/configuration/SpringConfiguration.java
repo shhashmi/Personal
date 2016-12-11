@@ -15,6 +15,12 @@ public class SpringConfiguration {
 	@Value("${com.gojek.locator.executor.corepoolsize}")
 	private int corePoolSize; 
 	
+//	@Value("${com.gojek.locator.executor.itemqueuesize}")
+//	private int size;
+	
+	@Value("${com.gojek.locator.executor.corepoolsize}")
+	private int maxPoolSize;
+	
 	@Bean("com.gojek.driverupdate.requestqueue")
 	public LinkedBlockingQueue<UpdateDriverLocationRequest> getDriverUpdateQueue() {
 		return new LinkedBlockingQueue<UpdateDriverLocationRequest>();
@@ -26,7 +32,7 @@ public class SpringConfiguration {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(corePoolSize);
 		executor.setQueueCapacity(51000);
-		executor.setMaxPoolSize(20);
+		executor.setMaxPoolSize(maxPoolSize);
 		executor.setWaitForTasksToCompleteOnShutdown(true);
 		
 		

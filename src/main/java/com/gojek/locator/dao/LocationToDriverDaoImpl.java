@@ -1,4 +1,4 @@
-package com.gojek.locator.cache;
+package com.gojek.locator.dao;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -18,14 +18,15 @@ import com.gojek.locator.model.DriverLocation;
 import com.gojek.locator.model.Location;
 
 @Component
-public class LocationToDriverCache {
+public class LocationToDriverDaoImpl implements LocationToDriverDao {
 
 	@Autowired
-	private DriverLocationCache driverLocations;
+	private DriverLocationDao driverLocations;
 	
 	NavigableMap<Double, Set<Integer>> latRangeMap = new TreeMap<Double,Set<Integer>>();
 	NavigableMap<Double, Set<Integer>> longRangeMap = new TreeMap<Double,Set<Integer>>();
 	
+	@Override
 	public void addToCache(int driverId,Location location) {
 		
 		Double latKey = getLatLongKey(location.getLatitude());
@@ -52,6 +53,7 @@ public class LocationToDriverCache {
 		
 	}
 	
+	@Override
 	public Set<Integer> getDrivers(Location location) {
 		
 		Set<Integer> driversAtUpperLat = getEntryValueSet(latRangeMap.ceilingEntry(location.getLatitude()));
@@ -63,6 +65,7 @@ public class LocationToDriverCache {
 		
 	}
 	
+	@Override
 	public Map<DriverLocation,Integer> getMaxDriverCountInRange(Location searchLocation,int distance,int limit) {
 		//Set<Integer> drivers = getDrivers(searchLocation);
 		
@@ -154,6 +157,7 @@ public class LocationToDriverCache {
 		return new HashSet<>(entry.getValue());
 	}
 	
+	@Override
 	public void removeDriver(DriverLocation driverLocation) {
 		if(driverLocation.getLocation()==null) {
 			return ;
@@ -174,7 +178,7 @@ public class LocationToDriverCache {
 		}
 		BigDecimal b = new BigDecimal(value);
 		
-		return b.setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
+		return b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
 		
 	}
 	

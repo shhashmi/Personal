@@ -9,6 +9,7 @@ import com.gojek.locator.service.resource.DriverResource;
 public class Config extends ResourceConfig{
 
 	 public Config() {
+		 	packages("com.gojek");
 	        register(DriverResource.class);
 	    }
 
