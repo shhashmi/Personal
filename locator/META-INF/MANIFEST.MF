@@ -1,0 +1,1 @@
+Main-Class: com.gojek.locator.main.Main
