@@ -18,6 +18,7 @@ import com.gojek.locator.dao.LocationToDriverDao;
 import com.gojek.locator.error.ErrorMessage;
 import com.gojek.locator.model.DriverLocation;
 import com.gojek.locator.model.GetDriverResponse;
+import com.gojek.locator.model.GetDriverResponse.NearByDriver;
 import com.gojek.locator.model.Location;
 import com.gojek.locator.model.UpdateDriverLocationRequest;
 import com.gojek.locator.model.UpdateDriverLocationResponse;
@@ -80,20 +81,22 @@ public class DriverServiceImpl implements DriverService{
 	}
 
 	@Override
-	public Set<GetDriverResponse> getDrivers(Location location, int driverCountLimit, int radius) {
+	public GetDriverResponse getDrivers(Location location, int driverCountLimit, int radius) {
 		Map<DriverLocation,Integer> driverLocationWithDistance = locationToDriverCache.getMaxDriverCountInRange(location, radius, driverCountLimit);
-		Set<GetDriverResponse> driverLocationsWithDistance = new HashSet<GetDriverResponse>();
-		driverLocationWithDistance.forEach(((dLoc,disntace)->{
-			GetDriverResponse getDriverResponse = new GetDriverResponse();
-			getDriverResponse.setDriverId(dLoc.getDriverId());
-			Location driverLocation = dLoc.getLocation();
-			getDriverResponse.setLatitude(driverLocation.getLatitude());
-			getDriverResponse.setLongitude(driverLocation.getLongitude());
-			getDriverResponse.setDistance(location.diff(driverLocation));
-			driverLocationsWithDistance.add(getDriverResponse);
-		}));
+		Set<NearByDriver> driverLocationsWithDistance = new HashSet<NearByDriver>();
 		
-		return driverLocationsWithDistance;
+		driverLocationWithDistance.forEach(((dLoc,disntace)->{
+			NearByDriver driver = new NearByDriver();
+			driver.setDriverId(dLoc.getDriverId());
+			Location driverLocation = dLoc.getLocation();
+			driver.setLatitude(driverLocation.getLatitude());
+			driver.setLongitude(driverLocation.getLongitude());
+			driver.setDistance(location.diff(driverLocation));
+			driverLocationsWithDistance.add(driver);
+		}));
+		GetDriverResponse response = new GetDriverResponse();
+		response.setDrivers(driverLocationsWithDistance);
+		return response;
 	}
 	
 	

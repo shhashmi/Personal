@@ -51,8 +51,11 @@ public class DriverResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response getDrivers(@QueryParam("latitude") Double latitude, @QueryParam("longitude") Double longitude,
 			@QueryParam("radius") @DefaultValue("500") int radius, @QueryParam("limit") @DefaultValue("10") int limit) {
-		Set<GetDriverResponse> drivers = driverService.getDrivers(new Location(latitude,longitude), limit, radius);
+		
 		RequestValidator.validateGetDriverRequest(latitude, longitude);
+		
+		GetDriverResponse drivers = driverService.getDrivers(new Location(latitude,longitude), limit, radius);
+		
 		return Response.status(Status.OK).entity(drivers).build();
 		
 		

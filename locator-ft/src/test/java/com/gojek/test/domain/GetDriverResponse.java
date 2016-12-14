@@ -1,4 +1,4 @@
-package com.gojek.locator.model;
+package com.gojek.test.domain;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -23,14 +23,13 @@ public class GetDriverResponse {
 	public void setErrors(String[] errors) {
 		this.errors = errors;
 	}
+
 	@JsonProperty
 	private Set<NearByDriver> drivers;
 
-	
 	public Set<NearByDriver> getDrivers() {
 		return drivers;
 	}
-
 
 	public void setDrivers(Set<NearByDriver> drivers) {
 		this.drivers = drivers;
@@ -68,8 +67,6 @@ public class GetDriverResponse {
 	public String toString() {
 		return "GetDriverResponse [errors=" + Arrays.toString(errors) + ", drivers=" + drivers + "]";
 	}
-
-
 
 	public static class NearByDriver {
 		public NearByDriver() {
