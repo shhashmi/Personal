@@ -53,6 +53,13 @@ public class LocationToDriverDaoImpl implements LocationToDriverDao {
 		
 	}
 	
+	
+	/* (non-Javadoc)
+	 * Entire latitude, longitude is divided into smaller cells of square shape. To affectively implement this without too much of space overhead
+	 * all the drivers at a particular latitude are stored as a list against that latitude and same is the case for longitude. Granularity of latitude and 
+	 * longitude is 1. Latitude and Longitude Data is stored in a data structure that enables query based on closest match.
+	 * @see com.gojek.locator.dao.LocationToDriverDao#getDrivers(com.gojek.locator.model.Location)
+	 */
 	@Override
 	public Set<Integer> getDrivers(Location location) {
 		
@@ -81,15 +88,19 @@ public class LocationToDriverDaoImpl implements LocationToDriverDao {
 			}
 			
 			Set<Integer> drivers = getDrivers(location);
-			drivers.forEach((driver->{
+			for(Integer driver : drivers){
 				Location dLoc = driverLocations.getLocation(driver);
 				int diff = dLoc.diff(searchLocation);
 				if(diff<=distance) {
 					driverWithDistance.put(new DriverLocation(driver, dLoc), diff);
 				}
-			}));
-			
-			if(driverWithDistance.keySet().size()>=limit) {
+				if(isExpectedDriverCountMet(driverWithDistance, limit)) {
+					break;
+				}
+				
+			}
+
+			if(isExpectedDriverCountMet(driverWithDistance, limit)) {
 				break;
 			}
 			
@@ -103,6 +114,12 @@ public class LocationToDriverDaoImpl implements LocationToDriverDao {
 		
 	}
 	
+	private boolean isExpectedDriverCountMet(Map<DriverLocation,Integer> driverWithDistance, int maxDriverCount) {
+		if(driverWithDistance.keySet().size()>=maxDriverCount) {
+			return true;
+		}
+		return false;
+	}
 	
 	Set<Location> getLocationsAround(Location location, Set<Location> visited,Location searchLocation, int distance) {
 		Set<Location> locations = new HashSet<Location>();

@@ -38,21 +38,14 @@ public class FindDriverTest {
 	@Test
 	public void getDriverCountAndLimitTest() throws Exception {
 
-		 for(int i=1;i<=49090;i++) {
-			 UpdateDriverLocationRequest request = new
-			 UpdateDriverLocationRequest();
-			 request.setLatitude(-10.00000000);
-			 request.setLongitude(-17.97569987);
-			 APIClient.updateDriverLocation(i, request);
-		 }
 		for (int i = 1; i < 10; i++) {
 			UpdateDriverLocationRequest request = new UpdateDriverLocationRequest();
 			request.setLatitude(80.0050000 + i);
 			request.setLongitude(70.9796998 + i);
 			Response re = APIClient.updateDriverLocation(i, request);
-			
-			//System.out.println(re.readEntity(UpdateDriverLocationResponse.class));
-			
+
+			// System.out.println(re.readEntity(UpdateDriverLocationResponse.class));
+
 		}
 
 		Response response = APIClient.findDriver(80.00500000, 70.97969987, 10, 5);
@@ -61,26 +54,59 @@ public class FindDriverTest {
 		Assert.assertEquals(drivers.size(), 5);
 
 	}
-	
+
 	@Test
 	public void getDriverInvalidLatitude() throws Exception {
 
-		
 		Response response = APIClient.findDriver(180.00500000, 70.97969987, 10, 5);
 		GetDriverResponse getResponse = response.readEntity(GetDriverResponse.class);
 		Assert.assertEquals(getResponse.getErrors()[0], "Latitude should be between +/- 90");
 
 	}
-	
 
 	@Test
 	public void getDriverInvalidLongitude() throws Exception {
 
-		
 		Response response = APIClient.findDriver(80.00500000, 170.97969987, 10, 5);
 		GetDriverResponse getResponse = response.readEntity(GetDriverResponse.class);
 		Assert.assertEquals(getResponse.getErrors()[0], "Longitude should be between +/- 90");
 
+	}
+	
+	@Test
+	public void getDriverDistanceLimit() throws Exception{
+		
+		/**
+		 * add drivers with greater than expected distance;
+		 */
+		for (int i = 1; i < 20; i++) {
+			UpdateDriverLocationRequest request = new UpdateDriverLocationRequest();
+			request.setLatitude(-80.0050000 + i);
+			request.setLongitude(-70.9796998 + i);
+			Response re = APIClient.updateDriverLocation(i, request);
+
+			// System.out.println(re.readEntity(UpdateDriverLocationResponse.class));
+
+		}
+
+		/**
+		 * Add drivers within expected distance from search location
+		 */
+		
+		for (Long i = 21L; i < 40; i++) {
+			UpdateDriverLocationRequest request = new UpdateDriverLocationRequest();
+			
+			request.setLatitude(80.050000 + i/10);
+			request.setLongitude(70.9796998 + i/10);
+			APIClient.updateDriverLocation(i.intValue(), request);
+
+		}
+		
+		
+		Response response = APIClient.findDriver(80.00500000, 70.97969987, 30, 15);
+		GetDriverResponse getResponse = response.readEntity(GetDriverResponse.class);
+		Set<NearByDriver> drivers = getResponse.getDrivers();
+		Assert.assertEquals(drivers.size(), 15);
 	}
 
 }
