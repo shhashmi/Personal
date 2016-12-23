@@ -27,65 +27,37 @@ import com.gojek.locator.utils.Constants;
 import com.gojek.locator.utils.ModelTransformer;
 
 @Component
-public class DriverServiceImpl implements DriverService{
+public class DriverServiceImpl implements DriverService {
 
 	@Autowired
-	private DriverLocationDao driverLocationCache;
-	
+	private DriverLocationDao driverLocationdao;
+
 	@Autowired
-	private LocationToDriverDao locationToDriverCache;
-	
-	@Autowired
-	@Qualifier("com.gojek.driverupdate.requestqueue")
-	private LinkedBlockingQueue<UpdateDriverLocationRequest> linkedQueue;
-	
-	@Autowired
-	@Qualifier("com.gojek.driverupdate.threadpool")
-	private ThreadPoolTaskExecutor executor;
-	
-	
+	private LocationToDriverDao locationToDriverdao;
+
 	@Override
-	public UpdateDriverLocationResponse handleUpdateRequest(int driverId,UpdateDriverLocationRequest request) {
-		
-		UpdateDriverLocationResponse errorResponse = validateErrors(request);
-		if(errorResponse!=null) {
-			DriverLocation location = ModelTransformer.getDriverLocation(driverId, request);
-			updateCache(location);
-		}
-		return errorResponse;
-	}
-	
-	private UpdateDriverLocationResponse validateErrors(UpdateDriverLocationRequest request) {
-		UpdateDriverLocationResponse response = null;
-		List<String> errorMessages = new ArrayList<String>();
-		if(request.getLatitude()<Constants.MIN_LATITUDE || request.getLatitude()>Constants.MAX_LATITUDE) {
-			 errorMessages.add(ErrorMessage.InvalidLatitude.getMessage());
-		}
-		if(request.getLongitude()<-Constants.MIN_LONGITUDE || request.getLongitude()>Constants.MAX_LONGITUDE) {
-			errorMessages.add(ErrorMessage.InvalidLongitude.getMessage());
-		}
+	public void handleUpdateRequest(int driverId, UpdateDriverLocationRequest request) {
 
-		if(!errorMessages.isEmpty()) {
-			response = new UpdateDriverLocationResponse();
-			response.setErrors(errorMessages.toArray(new String[errorMessages.size()]));
-		}
-		
-		return response;
+		DriverLocation location = ModelTransformer.getDriverLocation(driverId, request);
+		updateLocation(location);
+
 	}
-	
-	private void updateCache(DriverLocation location) {
-		DriverLocation driverPreviousLocation = new DriverLocation(location.getDriverId(), driverLocationCache.getLocation(location.getDriverId()));
-		locationToDriverCache.removeDriver(driverPreviousLocation);
-		driverLocationCache.updateLocation(location.getDriverId(), location.getLocation());
-		locationToDriverCache.addToCache(location.getDriverId(), location.getLocation());
+
+	private void updateLocation(DriverLocation location) {
+		DriverLocation driverPreviousLocation = new DriverLocation(location.getDriverId(),
+				driverLocationdao.getLocation(location.getDriverId()));
+		locationToDriverdao.removeDriver(driverPreviousLocation);
+		driverLocationdao.updateLocation(location.getDriverId(), location.getLocation());
+		locationToDriverdao.addDriverLocation(location.getDriverId(), location.getLocation());
 	}
 
 	@Override
 	public GetDriverResponse getDrivers(Location location, int driverCountLimit, int radius) {
-		Map<DriverLocation,Integer> driverLocationWithDistance = locationToDriverCache.getMaxDriverCountInRange(location, radius, driverCountLimit);
+		Map<DriverLocation, Integer> driverLocationWithDistance = locationToDriverdao
+				.getMaxDriverCountInRange(location, radius, driverCountLimit);
 		Set<NearByDriver> driverLocationsWithDistance = new HashSet<NearByDriver>();
-		
-		driverLocationWithDistance.forEach(((dLoc,disntace)->{
+
+		driverLocationWithDistance.forEach(((dLoc, disntace) -> {
 			NearByDriver driver = new NearByDriver();
 			driver.setDriverId(dLoc.getDriverId());
 			Location driverLocation = dLoc.getLocation();
@@ -97,6 +69,22 @@ public class DriverServiceImpl implements DriverService{
 		GetDriverResponse response = new GetDriverResponse();
 		response.setDrivers(driverLocationsWithDistance);
 		return response;
+	}
+
+	public DriverLocationDao getDriverLocationdao() {
+		return driverLocationdao;
+	}
+
+	public void setDriverLocationdao(DriverLocationDao driverLocationdao) {
+		this.driverLocationdao = driverLocationdao;
+	}
+
+	public LocationToDriverDao getLocationToDriverdao() {
+		return locationToDriverdao;
+	}
+
+	public void setLocationToDriverdao(LocationToDriverDao locationToDriverdao) {
+		this.locationToDriverdao = locationToDriverdao;
 	}
 	
 	

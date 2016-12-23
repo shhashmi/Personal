@@ -72,6 +72,7 @@ public class GetDriverResponse {
 
 
 	public static class NearByDriver {
+		
 		public NearByDriver() {
 
 		}
@@ -133,6 +134,47 @@ public class GetDriverResponse {
 			return "GetDriverResponse [driverId=" + driverId + ", latitude=" + latitude + ", longitude=" + longitude
 					+ ", distance=" + distance + "]";
 		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((distance == null) ? 0 : distance.hashCode());
+			result = prime * result + driverId;
+			result = prime * result + ((latitude == null) ? 0 : latitude.hashCode());
+			result = prime * result + ((longitude == null) ? 0 : longitude.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			NearByDriver other = (NearByDriver) obj;
+			if (distance == null) {
+				if (other.distance != null)
+					return false;
+			} else if (!distance.equals(other.distance))
+				return false;
+			if (driverId != other.driverId)
+				return false;
+			if (latitude == null) {
+				if (other.latitude != null)
+					return false;
+			} else if (!latitude.equals(other.latitude))
+				return false;
+			if (longitude == null) {
+				if (other.longitude != null)
+					return false;
+			} else if (!longitude.equals(other.longitude))
+				return false;
+			return true;
+		}
+
 
 	}
 

@@ -7,6 +7,7 @@ import javax.ws.rs.ext.Provider;
 import com.gojek.locator.error.ErrorMessage;
 import com.gojek.locator.exception.InvalidLatitudeException;
 import com.gojek.locator.model.UpdateDriverLocationResponse;
+import com.gojek.locator.utils.Constants;
 
 @Provider
 public class InvalidLatitudeExceptionMapper implements ExceptionMapper<InvalidLatitudeException> {
@@ -17,7 +18,7 @@ public class InvalidLatitudeExceptionMapper implements ExceptionMapper<InvalidLa
 		String[] error = {ErrorMessage.InvalidLatitude.getMessage()};
 		response.setErrors(error);
 		
-		return Response.status(422).entity(response).build();
+		return Response.status(Constants.UNPROCESSABLE_ENTITY_RESPONSE).entity(response).build();
 		
 	}
 

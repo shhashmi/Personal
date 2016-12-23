@@ -8,4 +8,5 @@ public class Constants {
 	public static final double MAX_LONGITUDE = 90;
 	public static final int MIN_ACCURACY = 0;
 	public static final int MAX_ACCURACY = 1;
+	public static final int UNPROCESSABLE_ENTITY_RESPONSE = 422;
 }

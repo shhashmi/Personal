@@ -12,7 +12,7 @@ public interface DriverService {
 	 * @param request
 	 * @return
 	 */
-	UpdateDriverLocationResponse handleUpdateRequest(int driverId,UpdateDriverLocationRequest request);
+	void handleUpdateRequest(int driverId,UpdateDriverLocationRequest request);
 	
 	/**
 	 * Get the drivers around a location

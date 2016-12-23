@@ -34,6 +34,6 @@ public interface LocationToDriverDao {
 	 * @param driverId
 	 * @param location
 	 */
-	void addToCache(int driverId, Location location);
+	void addDriverLocation(int driverId, Location location);
 
 }
